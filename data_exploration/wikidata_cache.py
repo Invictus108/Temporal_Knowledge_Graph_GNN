@@ -1,3 +1,7 @@
+
+# generates cache for entites and relations
+
+
 import os
 import json
 import time

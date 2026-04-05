@@ -123,6 +123,7 @@ Data considerations:
      - this is more of a code thing. We're gonna have to figure this out
    - a strict typing system would provide a lot of structure that could be exploited
      - unless the data already has it we would probably need a llm pipeline to type everything
+     - built into wikidata?
    - constrained number of relationships 
      - this could also be a pain if not in dataset
 

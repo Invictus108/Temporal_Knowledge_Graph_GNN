@@ -19,7 +19,7 @@ ENTITY_CACHE_FILE = os.path.join(BASE_PATH, "wikidata_entity_label_cache.json")
 RELATION_CACHE_FILE = os.path.join(BASE_PATH, "wikidata_relation_label_cache.json")
 YEARLY_TRIPLES_JSON = os.path.join(BASE_PATH, "wiki_data_yearly_triples.json")
 
-USE_CACHE = False
+USE_CACHE = True
 
 MAX_EDGES_TO_DRAW = 120
 MAX_NODES_TO_DRAW = 50
