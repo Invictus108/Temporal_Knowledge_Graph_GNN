@@ -2,11 +2,13 @@ Goals: model can predict new edges in a graph over time
    - This will likely involved merging a GCN (likely attentions based) with a recurrent model, likely a LSTM
    - Advanced: models can predict new nodes
       - generate node (from LSTM hidden state or dedicated sub-network that turns subgraph into LLM input)
+        - It can also just select nodes from candidate states we init the network with
+          - Could actually be better because user can define entites and descriptions
         - need generative text models (fine tuned LLMs) for this
       - generate edges using link prediction
         - top k from sample triples sampled from subgraph and edge types
 
-
+Notes: Model will be created with global node pool. Some nodes will be unconnected. This is ok.
 
 First need to consider how to represent the text in edges and nodes
 
@@ -98,9 +100,11 @@ Link prediction
 
 Node gen (Advanced)
    - Note: this would run before the GNN
-   - generate new node on LSTM hidden state
-      - probably via finetuned_LLM(lstm_hidden)
-   - embed text to create new node embedding
+   - sample from nodes in candidate pool (unconnected ones in global node pool)
+      - true node get (probably too much)
+        - generate new node on LSTM hidden state
+            - probably via finetuned_LLM(lstm_hidden)
+        - embed text to create new node embedding
    - run link prediction with new node
       - this is hard because we have nothing to base this off
       - could randomly sample

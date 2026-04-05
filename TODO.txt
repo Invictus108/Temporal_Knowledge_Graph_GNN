@@ -31,3 +31,12 @@ define model (link pred)
 
 train and tune
 
+
+Problems:
+graph is actaully a bunch of subgraphs
+   - this is ok
+   - if anything this will just help the model
+nodes are appearing and vanishing
+   - create a global node set that is same across all steps
+   - when there are no edges connecting its just alone
+
