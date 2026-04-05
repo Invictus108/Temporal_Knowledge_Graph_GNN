@@ -8,3 +8,9 @@ set the EVENTS_FILE equal to path and run
 
 Notes: I dont think ICEWS will work. We need a dataset that store persistent relationships that change over time
 ICEWS has events which makes the graph vary wildly between 2 timesteps
+
+Persistent Alternatives:
+Wikidata12k: https://zenodo.org/records/4286007#.X7uL8BMzYWo
+
+
+YAGO11k
