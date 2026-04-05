@@ -5,3 +5,6 @@ ICEWS
 get events from here: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/28075
 unzip one of the events files (it should be a .tab)
 set the EVENTS_FILE equal to path and run
+
+Notes: I dont think ICEWS will work. We need a dataset that store persistent relationships that change over time
+ICEWS has events which makes the graph vary wildly between 2 timesteps

@@ -47,69 +47,69 @@ With embedding taken care of each node will be represented by a embedding and we
 
 
 Update Rule: h(t+1)_i = Non-Linearity(Sum(a_ij * m_ij)) where a_ij is a attention score and m is message (linear combination of messages)
-   - attention scores are calcuatd by a_score_ij = Non-Linearity(a(z_i, z_j, edge_ij)) where a_ij is attention socre, a is learned attention funtion and 
+   - attention scores are calculated by a_score_ij = Non-Linearity(a(z_i, z_j, edge_ij)) where a_ij is attention score, a is learned attention function and
      z is W_n * h. Do it only over neighbors
      - gotta do softmax to get a_ij
-   - messages (need a way to syntheize edges and nodes)
+   - messages (need a way to synthesize edges and nodes)
      - m_ij = W_h * h(t)_j + W_r * edge_ij
    
 
-- Multi head attnetions should be considered after single head is finished. Baically the same thing but project down and concat
-  - dim has to be divisble by number of heads
-  - Same set of the above equations for each head (so head has seperate, W_h, W_r, etc scaled down to project into dim/# heads)
+- Multi head attentions should be considered after single head is finished. Basically the same thing but project down and concat
+  - dim has to be divisible by number of heads
+  - Same set of the above equations for each head (so head has separate, W_h, W_r, etc scaled down to project into dim/# heads)
   - at end concat output of each head for full
 
 Further considerations
-   - since we are using sum should probabl use layer norms to keep things from exploding and maybe residuals
+   - since we are using sum should probably use layer norms to keep things from exploding and maybe residuals
    - Something like this
      h(t+1) = GNNLayer(h(t))
      h(t+1) = LayerNorm(h(t+1) + h(t))
       - Note: if using multi head attention need to project h(t) down
-   - can also add a feedforward network after attnetion like GNNs
+   - can also add a feedforward network after attention like GNNs
      h(t+1) = LayerNorm(h(t+1) + MLP(h(t+1)))
    - dropouts could also be useful for better generalization 
 
 
-Running this for a bit will give us rich contextual embeddings for each node, which we can then use for link prediciton and node gen
+Running this for a bit will give us rich contextual embeddings for each node, which we can then use for link prediction and node gen
 
-Link prediciton
+Link prediction
    - consider possible edges between node i and node j
    - Feed (i, j, edge) into a basic MLP and get a score
-      - consition of LSTM hidden state for more context
+      - condition on LSTM hidden state for more context
       - MLP(i , j, edge, lstm_hidden)
-   - has to be over a subset of nodes and edges or it become unfesible
-      - node sampleing strategeis (condiates j for each i)
-        - random (proably a bad idea but a bit of noise isnt bad)
+   - has to be over a subset of nodes and edges or it become unfeasible
+      - node sampling strategies (candidates j for each i)
+        - random (probably a bad idea but a bit of noise isnt bad)
         - neighbors (selection of nodes of depth 1-3 away from i)
-        - embedding similarity (dot product with node embedding matrix (could be expesnive))
-      - edge sampleing
+        - embedding similarity (dot product with node embedding matrix (could be expensive))
+      - edge sampling
         - total random (probably a bad idea but a bit of noise isnt bad)
-        - build counts of edges in neighbors and sample probablisitclaly from it based on count (with noise)
-          - count also be based off how good edge is, so MLP(i , j, edge) but that might be to expesnive
-        - TODO: need more possibilites
+        - build counts of edges in neighbors and sample probabilistically from it based on count (with noise)
+          - count also be based off how good edge is, so MLP(i , j, edge) but that might be to expensive
+        - TODO: need more possibilities
     - batch all triplets into single tensor and pass to scoring MLP
     - Apply sigmoid to get probs
-    - possible link selection strategies (should it be allowed to create more than one link pertimstep?)
+    - possible link selection strategies (should it be allowed to create more than one link per timestep?)
         - anything that passes a certain threshold (variable multi link)
         - top k (fixed multi-link)
-        - apply softmax and sample probablisitclaly (fixed mutli link)
+        - apply softmax and sample probabilistically (fixed multi link)
     - add to graph tables
 
 
 Node gen (Advanced)
    - Note: this would run before the GNN
-   - genrate new node on LSTM hidden state
+   - generate new node on LSTM hidden state
       - probably via finetuned_LLM(lstm_hidden)
    - embed text to create new node embedding
-   - run link prediciton with new node
-      - this is hard bacuse we have nothing to base this off
+   - run link prediction with new node
+      - this is hard because we have nothing to base this off
       - could randomly sample
-      - or use type constraints if we impliment typing
+      - or use type constraints if we implement typing
    - add to graph tables
     
 
 
-After Link prediciton update LSTM hidden state
+After Link prediction update LSTM hidden state
   - x = ReadOut(H) # convert graph to vector for LSTM
     - probably attention pooling
       - compute attention score and readout becomes a linear combination of node embedding weighed by attention scores
@@ -119,10 +119,10 @@ After Link prediciton update LSTM hidden state
 
 
 Data considerations:
-   - structure has to be suitble for pytorch
+   - structure has to be suitable for pytorch
      - this is more of a code thing. We're gonna have to figure this out
-   - a strict typing system would provide a lot of strcutre that could be exploted
-     - unless the data already has it we would probly need a llm pipeine to type everything
+   - a strict typing system would provide a lot of structure that could be exploited
+     - unless the data already has it we would probably need a llm pipeline to type everything
    - constrained number of relationships 
      - this could also be a pain if not in dataset
 
