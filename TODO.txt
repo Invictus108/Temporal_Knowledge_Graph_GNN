@@ -28,6 +28,7 @@ define model (link pred)
    - lstm layers 
    - candidate selection
    - loss (research graph similarity metrics)
+     - Probably binary cross entropy
 
 train and tune
 

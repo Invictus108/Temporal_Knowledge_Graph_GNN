@@ -42,6 +42,13 @@ Then how to rep node text:
             to be one shot.
                - Or we could go with the above idea to just generate a graph embedding and throw it into a fine tuned LLM
 
+The best idea is to go with multiple pretrained embeddings of names, class, and description. 
+Then put a embedding head the takes in each embedding vectors, synthesizes it and projects down into GNN dim
+   - dataset will be a concatenation of the three because we can just leave it as the concat or project down
+
+
+
+
 Text embedding could also be merged with structural embedding in some way, but the structure will probably be learned via
 convolutions so its probably ok.
 

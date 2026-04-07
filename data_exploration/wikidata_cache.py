@@ -70,20 +70,9 @@ def save_cache(cache, path):
 # =========================
 # DESCRIPTION RESOLUTION
 # =========================
-def extract_description(entity, fallback_id=None):
-    descriptions = entity.get("descriptions", {})
 
-    for key in ["en", "en-us", "en-gb", "mul"]:
-        if key in descriptions and "value" in descriptions[key]:
-            return descriptions[key]["value"]
 
-    if descriptions:
-        first = next(iter(descriptions.values()))
-        return first.get("value", fallback_id)
-
-    return fallback_id
-
-def fetch_wikidata_description(wikidata_id):
+def fetch_wikidata_data(wikidata_id):
     url = f"https://www.wikidata.org/wiki/Special:EntityData/{wikidata_id}.json"
 
     for attempt in range(MAX_RETRIES):
@@ -103,7 +92,7 @@ def fetch_wikidata_description(wikidata_id):
             if entity is None:
                 return wikidata_id
 
-            return extract_description(entity, wikidata_id)
+            return extract_data(entity, wikidata_id)
 
         except Exception as e:
             wait = max(2 ** attempt, 1)
@@ -115,6 +104,12 @@ def fetch_wikidata_description(wikidata_id):
 # =========================
 # LABEL RESOLUTION
 # =========================
+def extract_data(entity, wikidata_id):
+    label = extract_label(entity, wikidata_id)
+    description = extract_description(entity, wikidata_id)
+
+    return {"label": label, "description": description}
+
 def extract_label(entity, fallback_id=None):
     labels = entity.get("labels", {})
 
@@ -128,35 +123,19 @@ def extract_label(entity, fallback_id=None):
 
     return fallback_id
 
+def extract_description(entity, fallback_id=None):
+    descriptions = entity.get("descriptions", {})
 
-def fetch_wikidata_label(wikidata_id):
-    url = f"https://www.wikidata.org/wiki/Special:EntityData/{wikidata_id}.json"
+    for key in ["en", "en-us", "en-gb", "mul"]:
+        if key in descriptions and "value" in descriptions[key]:
+            return descriptions[key]["value"]
 
-    for attempt in range(MAX_RETRIES):
-        try:
-            resp = requests.get(url, headers=HEADERS, timeout=20)
+    if descriptions:
+        first = next(iter(descriptions.values()))
+        return first.get("value", fallback_id)
 
-            if resp.status_code == 429:
-                wait = max(2 ** attempt, 1)
-                print(f"429 for {wikidata_id}, sleeping {wait}s...")
-                time.sleep(wait)
-                continue
+    return fallback_id
 
-            resp.raise_for_status()
-            data = resp.json()
-
-            entity = data.get("entities", {}).get(wikidata_id)
-            if entity is None:
-                return wikidata_id
-
-            return extract_label(entity, wikidata_id)
-
-        except Exception as e:
-            wait = max(2 ** attempt, 1)
-            print(f"Error resolving {wikidata_id}: {e}. Sleeping {wait}s...")
-            time.sleep(wait)
-
-    return wikidata_id
 
 
 def build_cache_from_mapping(mapping, cache_path, kind):
@@ -177,14 +156,12 @@ def build_cache_from_mapping(mapping, cache_path, kind):
             print(f"[cache   {i}/{total}] {raw_id} -> {cache[raw_id]}")
             continue
 
-        label = fetch_wikidata_label(raw_id)
-        # cache[raw_id] = label
-        description = fetch_wikidata_description(raw_id)
-        cache[raw_id] = {"label": label, "description": description}
+        data = fetch_wikidata_data(raw_id)
+        cache[raw_id] = data
         
         save_cache(cache, cache_path)
 
-        print(f"[fetched {i}/{total}] {raw_id} -> {label}")
+        print(f"[fetched {i}/{total}] {raw_id} -> {data}")
         time.sleep(REQUEST_SLEEP)
 
     print(f"Finished {kind} cache: {cache_path}")
