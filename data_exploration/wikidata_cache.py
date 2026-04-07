@@ -72,8 +72,11 @@ def save_cache(cache, path):
 # =========================
 
 
+
 def fetch_wikidata_data(wikidata_id):
     url = f"https://www.wikidata.org/wiki/Special:EntityData/{wikidata_id}.json"
+
+    print(f"attempting {wikidata_id}")
 
     for attempt in range(MAX_RETRIES):
         try:
@@ -90,6 +93,7 @@ def fetch_wikidata_data(wikidata_id):
 
             entity = data.get("entities", {}).get(wikidata_id)
             if entity is None:
+                print("failed")
                 return wikidata_id
 
             return extract_data(entity, wikidata_id)
@@ -99,6 +103,7 @@ def fetch_wikidata_data(wikidata_id):
             print(f"Error resolving description for {wikidata_id}: {e}. Sleeping {wait}s...")
             time.sleep(wait)
 
+    print("ran out of tries")
     return wikidata_id
 
 # =========================
@@ -107,6 +112,7 @@ def fetch_wikidata_data(wikidata_id):
 def extract_data(entity, wikidata_id):
     label = extract_label(entity, wikidata_id)
     description = extract_description(entity, wikidata_id)
+    print(label, description)
 
     return {"label": label, "description": description}
 

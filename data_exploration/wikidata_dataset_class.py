@@ -14,6 +14,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
         start_year: int,
         entity_to_id: Dict[str, int],
         relation_to_id: Dict[str, int],
+        entity_to_data: Dict[str, Dict[str, Any]],
         embed_fn: Callable[[List[str]], np.ndarray],
         json_filename: str,
         dataset_filename: str,
@@ -27,6 +28,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
         self.relation_to_id = relation_to_id
         self.embed_fn = embed_fn
         self.start = start_year
+        self.entity_to_data = entity_to_data
 
         # Filled after loading processed file
         self.x_global: Optional[torch.Tensor] = None
@@ -74,7 +76,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
             )
 
         # order entities
-        entity_texts_ordered = [id_to_entity[i] for i in range(num_nodes)]
+        entity_texts_ordered = [self.entity_to_data[id_to_entity[i]] for i in range(num_nodes)]
 
         # get embeddings
         embeddings = self.embed_fn(entity_texts_ordered)
@@ -116,8 +118,16 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
 
             for triple in triples:
                 # get text
-                head_text = triple["head"]
-                tail_text = triple["tail"]
+                try:
+                    head_text = triple["head"]["label"]
+                except:
+                    head_text = triple["head"]
+                
+                try:
+                    tail_text = triple["tail"]["label"]
+                except:
+                    tail_text = triple["tail"]
+                    
                 rel_text = triple["relation"]
 
                 # extract ids
