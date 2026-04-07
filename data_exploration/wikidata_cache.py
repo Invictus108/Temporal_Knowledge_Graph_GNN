@@ -67,6 +67,50 @@ def save_cache(cache, path):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(cache, f, indent=2, ensure_ascii=False)
 
+# =========================
+# DESCRIPTION RESOLUTION
+# =========================
+def extract_description(entity, fallback_id=None):
+    descriptions = entity.get("descriptions", {})
+
+    for key in ["en", "en-us", "en-gb", "mul"]:
+        if key in descriptions and "value" in descriptions[key]:
+            return descriptions[key]["value"]
+
+    if descriptions:
+        first = next(iter(descriptions.values()))
+        return first.get("value", fallback_id)
+
+    return fallback_id
+
+def fetch_wikidata_description(wikidata_id):
+    url = f"https://www.wikidata.org/wiki/Special:EntityData/{wikidata_id}.json"
+
+    for attempt in range(MAX_RETRIES):
+        try:
+            resp = requests.get(url, headers=HEADERS, timeout=20)
+
+            if resp.status_code == 429:
+                wait = max(2 ** attempt, 1)
+                print(f"429 for {wikidata_id}, sleeping {wait}s...")
+                time.sleep(wait)
+                continue
+
+            resp.raise_for_status()
+            data = resp.json()
+
+            entity = data.get("entities", {}).get(wikidata_id)
+            if entity is None:
+                return wikidata_id
+
+            return extract_description(entity, wikidata_id)
+
+        except Exception as e:
+            wait = max(2 ** attempt, 1)
+            print(f"Error resolving description for {wikidata_id}: {e}. Sleeping {wait}s...")
+            time.sleep(wait)
+
+    return wikidata_id
 
 # =========================
 # LABEL RESOLUTION
@@ -134,7 +178,10 @@ def build_cache_from_mapping(mapping, cache_path, kind):
             continue
 
         label = fetch_wikidata_label(raw_id)
-        cache[raw_id] = label
+        # cache[raw_id] = label
+        description = fetch_wikidata_description(raw_id)
+        cache[raw_id] = {"label": label, "description": description}
+        
         save_cache(cache, cache_path)
 
         print(f"[fetched {i}/{total}] {raw_id} -> {label}")
