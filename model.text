@@ -1,0 +1,4 @@
+Dataset is a sequence of about 300 graphs sharing a common global node set
+
+At each timestep t the model will recieve a graph and try to predict the new edges added at timestep t+1
+
