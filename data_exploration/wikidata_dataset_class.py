@@ -12,6 +12,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
         self,
         root: str,
         start_year: int,
+        end_year: int,
         entity_to_id: Dict[str, int],
         relation_to_id: Dict[str, int],
         entity_to_data: Dict[str, Dict[str, Any]],
@@ -28,6 +29,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
         self.relation_to_id = relation_to_id
         self.embed_fn = embed_fn
         self.start = start_year
+        self.end = end_year
         self.entity_to_data = entity_to_data
 
         # Filled after loading processed file
@@ -108,7 +110,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
         data_list = []
 
         # iterate through years
-        for year in range(self.start, 2020):
+        for year in range(self.start, self.end): 
             triples = raw_data[str(year)]
 
             src = [] # source node indices
@@ -118,16 +120,8 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
 
             for triple in triples:
                 # get text
-                try:
-                    head_text = triple["head"]["label"]
-                except:
-                    head_text = triple["head"]
-                
-                try:
-                    tail_text = triple["tail"]["label"]
-                except:
-                    tail_text = triple["tail"]
-                    
+                head_text = triple["head"]["label"]
+                tail_text = triple["tail"]["label"] 
                 rel_text = triple["relation"]
 
                 # extract ids
