@@ -97,10 +97,14 @@ Link prediction
       - 1: predict only changes
         - All current triples are passed to the next graph
         - the model solely predicts additions to the graph
-        - this is kinda hard because we have to manage additions and so on
+           - make 2 seperate scoring heads, one for deletion and one for addition
+            - candidates are the true positives (things added or deleted), combined with a equal number of sampled negatives
+            - loss is calculated and backpropagated
+            - deletions and additions are added
       - 2: Predict entire graph 
         - Nothing is passed to next graph
         - Candidate set includes all current triples in graph + potential candidates
+          - Sample equal sizes from both current and proposed to have equal pos-neg class count
         - Benefits
           - Allows for removals of edges
           - simpler to implement
@@ -137,7 +141,7 @@ Link prediction
       - possible link selection strategies (should it be allowed to create more than one link per timestep?)
           - anything that passes a certain threshold (variable multi link)
           - top k (fixed multi-link)
-          - apply softmax and sample probabilistically (fixed multi link)
+          - apply softmax and sample probabilistically (variable multi link)
       - add to graph tables
 
 
