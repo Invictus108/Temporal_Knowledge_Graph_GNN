@@ -10,3 +10,9 @@ Autoregressive get should probablitically create new edges
 
 Need to create a neg-pos balance for loss
 
+The strategy that adds all current must be the first
+
+Need to balance loss:
+   Options:
+      - subsample cur edges?
+      - predict deltas?
