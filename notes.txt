@@ -1,0 +1,12 @@
+limited rel set (wikidata12k one)
+   - need to decrease size and complexity 
+
+check months to make sure they are not just 
+
+
+Autoregressive get should probablitically create new edges 
+   - no deterministic thresholds
+
+
+Need to create a neg-pos balance for loss
+

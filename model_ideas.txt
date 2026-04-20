@@ -149,6 +149,7 @@ Loss:
 
 Generation:
   - Autoregressive generation
+    - sample candidates based on probabilities output by forward pass
   - Start with one graph, run the network over it to get the next, then pass that graph back into the model and so on
 
 
