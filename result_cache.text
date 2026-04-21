@@ -67,3 +67,20 @@ epoch  49 | train 0.024925 | val 0.021119 | P 0.993279  R 0.999776  F1 0.996517 
 epoch  50 | train 0.024745 | val 0.021888 | P 0.993333  R 0.999832  F1 0.996572 | gap 71.505865 (pos 4.876939 neg -66.628925) | h@1 0.000503  h@3 0.001510  h@10 0.005033
 
 
+Deltas V1:
+epoch   1 | train del 0.5588 add 0.0919 | val del 0.5990 add 0.0069 | del P 0.016 R 0.016 F1 0.016 | add P 0.996 R 0.996 F1 0.996 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch   2 | train del 0.5423 add 0.0298 | val del 0.6603 add 0.0052 | del P 0.018 R 0.018 F1 0.018 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0006 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch   3 | train del 0.5344 add 0.0183 | val del 0.5854 add 0.0067 | del P 0.018 R 0.018 F1 0.018 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0006 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch   4 | train del 0.5292 add 0.0152 | val del 0.6293 add 0.0051 | del P 0.021 R 0.021 F1 0.021 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch   5 | train del 0.5255 add 0.0131 | val del 0.6519 add 0.0064 | del P 0.019 R 0.019 F1 0.019 | add P 0.997 R 0.997 F1 0.997 | del h@1 0.0006 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch   6 | train del 0.5222 add 0.0116 | val del 0.6179 add 0.0063 | del P 0.017 R 0.017 F1 0.017 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0006 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch   7 | train del 0.5181 add 0.0133 | val del 0.6440 add 0.0048 | del P 0.019 R 0.019 F1 0.019 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0000 h@10 0.0012 | add h@1 0.0037 h@10 0.0374
+epoch   8 | train del 0.5145 add 0.0109 | val del 0.6245 add 0.0046 | del P 0.015 R 0.015 F1 0.015 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch   9 | train del 0.5127 add 0.0103 | val del 0.6117 add 0.0061 | del P 0.010 R 0.010 F1 0.010 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch  10 | train del 0.5092 add 0.0079 | val del 0.6278 add 0.0035 | del P 0.013 R 0.013 F1 0.013 | add P 0.998 R 0.998 F1 0.998 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch  11 | train del 0.5126 add 0.0092 | val del 0.6299 add 0.0030 | del P 0.013 R 0.013 F1 0.013 | add P 0.999 R 0.999 F1 0.999 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch  12 | train del 0.5045 add 0.0078 | val del 0.6266 add 0.0025 | del P 0.012 R 0.012 F1 0.012 | add P 0.999 R 0.999 F1 0.999 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+epoch  13 | train del 0.5056 add 0.0067 | val del 0.6303 add 0.0020 | del P 0.016 R 0.016 F1 0.016 | add P 0.999 R 0.999 F1 0.999 | del h@1 0.0000 h@10 0.0018 | add h@1 0.0037 h@10 0.0374
+
+
+
