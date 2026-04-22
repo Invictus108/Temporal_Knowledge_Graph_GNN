@@ -1,18 +1,3 @@
-limited rel set (wikidata12k one)
-   - need to decrease size and complexity 
-
-check months to make sure they are not just 
-
-
-Autoregressive get should probablitically create new edges 
-   - no deterministic thresholds
-
-
-Need to create a neg-pos balance for loss
-
-The strategy that adds all current must be the first
-
-Need to balance loss:
-   Options:
-      - subsample cur edges?
-      - predict deltas?
+to much of the model depends on slow CPU operations
+need to find a way to make it more parallel to take advantage of GPUs
+or use a bunch of memonization to take advantage of lots of RAM
