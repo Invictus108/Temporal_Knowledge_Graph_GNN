@@ -1,3 +1,24 @@
 to much of the model depends on slow CPU operations
 need to find a way to make it more parallel to take advantage of GPUs
 or use a bunch of memonization to take advantage of lots of RAM
+
+
+Progress:
+Tried full graph prediction by giving it entire graph + sampled additions
+   - massive pos neg imbalance, just learned to pass on everything
+
+Sampling from current edges as positives, equal amount additions as negatives
+   - basically first version but with balanced pos-neg
+   - it seemed to be able to tell why is from current graph and which is additon and passed only current
+
+Deltas
+  - made two scoring heads one for additions, one for deletions
+      - deletions consist of edges that are actaully being removed + equal # sampled cur triplets
+      - additions are triplets being added + equal # proposals from candidate proposal strategies
+  - Dosent seem to work
+
+Next:
+Deltas with time
+   - integrate time awarness into model
+      - basically find a way to keep track of how many timesteps any given edge has been in the model
+   - find a way to put more operations of cpu for speed up
