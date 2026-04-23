@@ -1,6 +1,5 @@
 import json
-import os
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -37,6 +36,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
         # Filled after loading processed file
         self.x_global: Optional[torch.Tensor] = None
         self.id_to_entity: Optional[Dict[int, str]] = None
+        self.id_to_rel: Optional[Dict[int, str]] = None
 
         super().__init__(root, transform, pre_transform, pre_filter)
 
@@ -108,7 +108,6 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
         }
 
         entity_payloads = [self.entity_to_data[entity] for entity in subset_entities]
-
         embeddings = self.embed_fn(entity_payloads)
         embeddings = np.asarray(embeddings, dtype=np.float32)
 
@@ -142,31 +141,54 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
 
         data_list = []
 
+        # Tracks the current consecutive run length for each exact triple
+        # key = (local_head_id, relation_id, local_tail_id)
+        prev_run_length: Dict[Tuple[int, int, int], int] = {}
+        prev_active_triples: set[Tuple[int, int, int]] = set()
+
         for t in timesteps:
             triples = raw_data[t]
 
             src = []
             dst = []
             rels = []
+            rel_times = []
             active_nodes = set()
+            current_active_triples = set()
 
+            # First pass: convert triples to local ids and remember active triples this timestep
+            converted_triples: List[Tuple[int, int, int]] = []
             for triple in triples:
                 head_text = triple["head"]["label"]
                 tail_text = triple["tail"]["label"]
                 rel_text = triple["relation"]
 
-                # use local subset mapping here
                 h_id = entity_to_local_id[head_text]
                 t_id = entity_to_local_id[tail_text]
                 r_id = self.relation_to_id[rel_text]
 
-                src.append(h_id)
-                dst.append(t_id)
-                rels.append(r_id)
+                key = (h_id, r_id, t_id)
+                converted_triples.append(key)
+                current_active_triples.add(key)
 
                 active_nodes.add(h_id)
                 active_nodes.add(t_id)
 
+            # Second pass: compute rel_time for each edge
+            for h_id, r_id, t_id in converted_triples:
+                key = (h_id, r_id, t_id)
+
+                if key in prev_active_triples:
+                    run_len = prev_run_length[key] + 1
+                else:
+                    run_len = 1
+
+                src.append(h_id)
+                dst.append(t_id)
+                rels.append(r_id)
+                rel_times.append(float(run_len))
+
+            # Build tensors
             edge_index = (
                 torch.tensor([src, dst], dtype=torch.long)
                 if len(src) > 0
@@ -177,6 +199,12 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
                 torch.tensor(rels, dtype=torch.long)
                 if len(rels) > 0
                 else torch.empty((0,), dtype=torch.long)
+            )
+
+            edge_relative_time = (
+                torch.tensor(rel_times, dtype=torch.float)
+                if len(rel_times) > 0
+                else torch.empty((0,), dtype=torch.float)
             )
 
             active_nodes = (
@@ -192,6 +220,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
                 data = Data(
                     edge_index=edge_index,
                     edge_type=edge_type,
+                    edge_relative_time=edge_relative_time,   # <-- added
                     year=torch.tensor([year_val], dtype=torch.long),
                     month=torch.tensor([month_val], dtype=torch.long),
                     time=torch.tensor([time_value], dtype=torch.long),
@@ -203,6 +232,7 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
                 data = Data(
                     edge_index=edge_index,
                     edge_type=edge_type,
+                    edge_relative_time=edge_relative_time,   # <-- added
                     year=torch.tensor([year_val], dtype=torch.long),
                     time=torch.tensor([year_val], dtype=torch.long),
                     active_nodes=active_nodes,
@@ -210,6 +240,18 @@ class GlobalTemporalTextKGDataset(InMemoryDataset):
                 )
 
             data_list.append(data)
+
+            # Update run tracking for next timestep
+            next_run_length: Dict[Tuple[int, int, int], int] = {}
+            for h_id, r_id, t_id in converted_triples:
+                key = (h_id, r_id, t_id)
+                if key in prev_active_triples:
+                    next_run_length[key] = prev_run_length[key] + 1
+                else:
+                    next_run_length[key] = 1
+
+            prev_run_length = next_run_length
+            prev_active_triples = current_active_triples
 
         data, slices = self.collate(data_list)
 

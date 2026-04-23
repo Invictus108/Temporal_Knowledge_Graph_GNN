@@ -21,33 +21,37 @@ class TemporalGraphSnapshot:
         Directed edges for this timestep.
     edge_type : LongTensor of shape [E]
         Relation id for each edge.
+    edge_relative_time : FloatTensor of shape [E]
+        Relative-time feature for each edge.
     """
     edge_index: Tensor
     edge_type: Tensor
+    edge_relative_time: Tensor
 
 
 class SyntheticTemporalGraphDataset(Dataset):
     """
     Minimal temporal graph dataset compatible with code that expects:
 
-        dataset.x_global          # Tensor [num_nodes, embed_dim]
-        dataset.id_to_rel         # dict[int, str]
-        dataset.id_to_entity      # dict[int, str]
-        len(dataset)              # number of timesteps
-        dataset[t].edge_index     # LongTensor [2, E]
-        dataset[t].edge_type      # LongTensor [E]
+        dataset.x_global                 # Tensor [num_nodes, embed_dim]
+        dataset.id_to_rel                # dict[int, str]
+        dataset.id_to_entity             # dict[int, str]
+        len(dataset)                     # number of timesteps
+        dataset[t].edge_index            # LongTensor [2, E]
+        dataset[t].edge_type             # LongTensor [E]
+        dataset[t].edge_relative_time    # FloatTensor [E]
 
     Expected JSON format
     --------------------
     {
-      "x_global": [[...], [...], ...],              # required, shape [num_nodes, embed_dim]
-      "id_to_entity": {"0": "A0", "1": "A1", ...},  # optional but recommended
-      "id_to_rel": {"0": "rel1", "1": "rel2"},      # required
+      "x_global": [[...], [...], ...],
+      "id_to_entity": {"0": "A0", "1": "A1", ...},
+      "id_to_rel": {"0": "rel1", "1": "rel2"},
       "timesteps": [
         {
           "edges": [
-            {"src": 0, "dst": 10, "rel": 0},
-            {"src": 1, "dst": 11, "rel": 1}
+            {"src": 0, "dst": 10, "rel": 0, "rel_time": 3.0},
+            {"src": 1, "dst": 11, "rel": 1, "rel_time": 0.0}
           ]
         },
         {
@@ -60,9 +64,7 @@ class SyntheticTemporalGraphDataset(Dataset):
     -----
     - Node ids and relation ids in JSON may be strings or ints.
     - Empty timesteps are allowed.
-    - This class does not assume anything about the synthetic process itself.
-      Your generator can create any temporal rule as long as it writes the
-      JSON in the schema above.
+    - If an edge does not include 'rel_time', it defaults to 0.0.
     """
 
     def __init__(
@@ -107,11 +109,24 @@ class SyntheticTemporalGraphDataset(Dataset):
                     f"got {tuple(snapshot.edge_type.shape)}"
                 )
 
+            if snapshot.edge_relative_time.ndim != 1:
+                raise ValueError(
+                    f"Timestep {t}: edge_relative_time must have shape [E], "
+                    f"got {tuple(snapshot.edge_relative_time.shape)}"
+                )
+
             num_edges = snapshot.edge_index.shape[1]
+
             if snapshot.edge_type.shape[0] != num_edges:
                 raise ValueError(
                     f"Timestep {t}: edge_index has {num_edges} edges but "
                     f"edge_type has length {snapshot.edge_type.shape[0]}"
+                )
+
+            if snapshot.edge_relative_time.shape[0] != num_edges:
+                raise ValueError(
+                    f"Timestep {t}: edge_index has {num_edges} edges but "
+                    f"edge_relative_time has length {snapshot.edge_relative_time.shape[0]}"
                 )
 
             if num_edges > 0:
@@ -170,10 +185,12 @@ class SyntheticTemporalGraphDataset(Dataset):
             if len(edges) == 0:
                 edge_index = torch.empty((2, 0), dtype=torch.long)
                 edge_type = torch.empty((0,), dtype=torch.long)
+                edge_relative_time = torch.empty((0,), dtype=torch.float)
             else:
                 src_list = []
                 dst_list = []
                 rel_list = []
+                rel_time_list = []
 
                 for e in edges:
                     try:
@@ -186,15 +203,23 @@ class SyntheticTemporalGraphDataset(Dataset):
                             f"'src', 'dst', and 'rel'"
                         ) from exc
 
+                    rel_time = float(e.get("rel_time", 0.0))
+
                     src_list.append(src)
                     dst_list.append(dst)
                     rel_list.append(rel)
+                    rel_time_list.append(rel_time)
 
                 edge_index = torch.tensor([src_list, dst_list], dtype=torch.long)
                 edge_type = torch.tensor(rel_list, dtype=torch.long)
+                edge_relative_time = torch.tensor(rel_time_list, dtype=torch.float)
 
             timesteps.append(
-                TemporalGraphSnapshot(edge_index=edge_index, edge_type=edge_type)
+                TemporalGraphSnapshot(
+                    edge_index=edge_index,
+                    edge_type=edge_type,
+                    edge_relative_time=edge_relative_time,
+                )
             )
 
         dataset = cls(
@@ -218,6 +243,7 @@ class SyntheticTemporalGraphDataset(Dataset):
             TemporalGraphSnapshot(
                 edge_index=s.edge_index.to(device),
                 edge_type=s.edge_type.to(device),
+                edge_relative_time=s.edge_relative_time.to(device),
             )
             for s in self.timesteps
         ]

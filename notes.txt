@@ -17,8 +17,14 @@ Deltas
       - additions are triplets being added + equal # proposals from candidate proposal strategies
   - Dosent seem to work
 
+Deltas with rel time v6:
+   - added time a edge has been alive to the model and had a agent refactor the entire code base
+   - del actually appears to work on syntheic data, getting perfect F1 on toy dataset
+
+Deltas with rel time and history awarness (deltas_v7):
+   - same as v6, but we now track node, pair, and triplet history to build a strong understanding of whats makes a valid triplet
+   - used to both make better candidate proposals and for scoring additions
+
+
 Next:
-Deltas with time
-   - integrate time awarness into model
-      - basically find a way to keep track of how many timesteps any given edge has been in the model
-   - find a way to put more operations of cpu for speed up
+Add more noise to training?
