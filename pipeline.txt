@@ -1,9 +1,0 @@
-Custom WikiData pipeline (in custom_wikidata folder):
-    - Data_pipeline extract valid triples from wikidata dump and reads them to CSV in downloads folder
-    - data_processing and json_gen are technically the same script, but data_processing has a boolean on that make it 
-    - search the dump for entity and rel labels
-    - json_gen takes the csv and the cache jsons, and creates a yearly and a monthly json
-      - each has dates as keys and an array of triples as the value
-      - objects are a sub json with a label and description field
-    - then pass the json to wikidata_torch_dataset_gen.ipynb which will generate the actual pytorch dataset
-    - pass dataset to model and train

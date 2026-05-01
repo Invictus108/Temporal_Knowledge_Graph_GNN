@@ -1,9 +1,0 @@
-This is a record of the datasets I have made:
-full_monthly_v1: everything full_monthly_v1
-full_yearly_v1: everything yearly 
-monthly_1950_2000_v1: monthly from 1950-2000 (for more consistent graph sizes)
-limited_monthly_1950_2000_v1: monthly from 1950-2000 but only 23 rels in wikidata12k (for more consistent graph sizes and faster training)
-
-Simple: wikidata12 without descriptions
-descriptions_dataset_1800: wikidata12k with descriptions yearly from 1800-2020
-  - I lowkey forgot what _2 is. Probably the same but better
