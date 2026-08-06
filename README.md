@@ -4,6 +4,10 @@ This repository explores neural models for temporal knowledge graphs. The goal i
 
 The main modeling direction is a delta-prediction architecture: encode each graph snapshot with a relation-aware GNN, maintain recurrent node memory over time, generate candidate edge additions/deletions, and score those candidates with separate addition and deletion heads.
 
+## Paper
+
+The write-up for this project is included in the repository as [paper.pdf](paper.pdf). It covers the motivation, model design, datasets, and experimental results in more detail than this README.
+
 ## Project Overview
 
 Temporal knowledge graphs contain facts that are only valid during certain time ranges. Instead of predicting an entire graph from scratch at every timestep, this project treats graph evolution as a sequence of changes:
@@ -113,6 +117,7 @@ Exploration files:
 |-- notes.md                 # Experiment progress notes
 |-- pipeline.md              # Custom Wikidata pipeline notes
 |-- result_cache.md          # Saved experiment logs
+|-- paper.pdf                # Project write-up
 ```
 
 ## Main Notebooks
